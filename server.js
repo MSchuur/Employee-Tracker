@@ -9,3 +9,27 @@ const db = mysql.createConnection (
         database: 'employee_db'
     }
 )
+
+const questionPromt = () => {
+    inquirer
+        .prompt ({
+        type: 'list' ,
+        name: 'option',
+        message: 'What would you like to do?',
+        choices: [
+            'View All Departments',
+            'Veiw All Roles',
+            'View All Employees',
+            'Add a Department',
+            'Add Role',
+            'Add Employee',
+            'Quit'
+        ]
+    })
+    .then((option) => {
+
+    })
+
+
+
+}
