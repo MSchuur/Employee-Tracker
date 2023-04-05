@@ -32,7 +32,6 @@ const questionPrompt = () => {
     ]).then(function ({option})  {
         switch (option) {
             case 'View All Departments':
-                console.log('Dept');
                 viewDept();
                 break;
 
@@ -69,10 +68,20 @@ questionPrompt();
 const viewDept = () => {
     db.query('SELECT department.dept_id AS ID, department.dept_name AS Department FROM department',(err, res) => {
         if (err) throw err
-        // console.log(res);
         console.table(res);
         questionPrompt();
     })
 }
 
+const viewRoles = () => {
+    db.query('SELECT roles.role_id AS ID, roles.title AS Title, department.dept_name AS Department, roles.salary AS Salary FROM roles JOIN department ON roles.department_id = department.dept_id', (err, res) => {
+        if (err) throw err;
+        
+        console.table(res);
+        questionPrompt();
+    })
+}
 
+const viewEmployees = () => {
+    
+}
