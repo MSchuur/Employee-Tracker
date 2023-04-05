@@ -66,7 +66,7 @@ const questionPrompt = () => {
 questionPrompt();
 
 const viewDept = () => {
-    db.query('SELECT department.dept_id AS ID, department.dept_name AS Department FROM department',(err, res) => {
+    db.query('SELECT d.dept_id AS ID, d.dept_name AS Department FROM department d',(err, res) => {
         if (err) throw err
         console.table(res);
         questionPrompt();
@@ -83,5 +83,5 @@ const viewRoles = () => {
 }
 
 const viewEmployees = () => {
-    
+    db.query('SELECT employees.employee_id AS ID, employees.first_name AS First, employees.last_name AS Last, roles.title As Position, department.dept_name AS Department, roles.salary AS Salary, CONCAT(employees.first_name, " ", employees.last_name) AS Manager FROM employees JOIN roles ON employees.role_id = roles.role_id JOIN department ON roles.department_id = department.dept_id')
 }
