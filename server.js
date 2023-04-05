@@ -1,16 +1,16 @@
 const inquirer = require('inquirer');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 
 const db = mysql.createConnection (
     {
         host: 'localhost',
         user: 'root',
-        password: 'password',
+        password: '',
         database: 'employee_db'
     }
 )
 
-const questionPromt = () => {
+const questionPrompt = () => {
     inquirer
         .prompt ({
         type: 'list' ,
@@ -26,10 +26,41 @@ const questionPromt = () => {
             'Quit'
         ]
     })
-    .then((option) => {
+    .then((response) => {
+        switch (response) {
+            case 'View All Departments':
+                viewDept();
+                break;
 
-    })
+            case 'Veiw All Roles':
+                viewRoles();
+                break;
 
+            case 'View All Employees':
+                viewEmployees();
+                break;
 
+            case 'Add a Department':
+                addDept();
+                break;
+
+            case 'Add Role':
+                addRole();
+                break;
+
+            case 'Add Employee':
+                addEmployee();
+                break;
+
+            case 'Quit':
+                connection.end();
+                break
+        }
+    });
+}
+
+const viewDept = () => {
 
 }
+
+
