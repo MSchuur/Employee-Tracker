@@ -4,7 +4,11 @@ VALUES  ('Sales'),
         ('Finance'),
         ('Legal');
 
+<<<<<<< HEAD
 INSERT INTO roles (title, salary, department)
+=======
+INSERT INTO roles (title, salary, department_id)
+>>>>>>> da609c614de5c308ef79b51c04258ec3e54cabc0
 VALUES  ("Sales Lead", 100000, 1),
         ('Salesperson', 80000, 1),
         ('Lead Engineer', 150000, 2),
