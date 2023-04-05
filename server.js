@@ -1,18 +1,21 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
-
+require('dotenv').config();
+const cTabole = require('console.table');
 const db = mysql.createConnection (
     {
         host: 'localhost',
         user: 'root',
-        password: '',
-        database: 'employee_db'
-    }
+        password: process.env.PASSWORD,
+        database: 'employee_trackerDB'
+    },
+    console.log('Connected to the employee_trackeDB')
 )
 
 const questionPrompt = () => {
     inquirer
-        .prompt ({
+        .prompt ([
+        {
         type: 'list' ,
         name: 'option',
         message: 'What would you like to do?',
@@ -25,10 +28,11 @@ const questionPrompt = () => {
             'Add Employee',
             'Quit'
         ]
-    })
-    .then((response) => {
-        switch (response) {
+        }
+    ]).then(function ({option})  {
+        switch (option) {
             case 'View All Departments':
+                console.log('Dept');
                 viewDept();
                 break;
 
@@ -53,14 +57,22 @@ const questionPrompt = () => {
                 break;
 
             case 'Quit':
-                connection.end();
+                db.end();
+                console.log('Connection broken');
                 break
         }
     });
 }
 
-const viewDept = () => {
+questionPrompt();
 
+const viewDept = () => {
+    db.query('SELECT department.dept_id AS ID, department.dept_name AS Department FROM department',(err, res) => {
+        if (err) throw err
+        // console.log(res);
+        console.table(res);
+        questionPrompt();
+    })
 }
 
 
