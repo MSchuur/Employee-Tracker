@@ -67,21 +67,32 @@ questionPrompt();
 
 const viewDept = () => {
     db.query('SELECT d.dept_id AS ID, d.dept_name AS Department FROM department d',(err, res) => {
-        if (err) throw err
+        if (err) throw err;
+        console.log('\n');
+        console.log('DEPARTMENTS\n');
         console.table(res);
         questionPrompt();
     })
 }
 
 const viewRoles = () => {
-    db.query('SELECT roles.role_id AS ID, roles.title AS Title, department.dept_name AS Department, roles.salary AS Salary FROM roles JOIN department ON roles.department_id = department.dept_id', (err, res) => {
+    db.query('SELECT r.role_id AS ID, r.title AS Title, d.dept_name AS Department, r.salary AS Salary FROM roles r JOIN department d ON r.department_id = d.dept_id', (err, res) => {
         if (err) throw err;
-        
+        console.log('\n');
+        console.log('ROLES\n');
         console.table(res);
         questionPrompt();
     })
 }
 
 const viewEmployees = () => {
-    db.query('SELECT employees.employee_id AS ID, employees.first_name AS First, employees.last_name AS Last, roles.title As Position, department.dept_name AS Department, roles.salary AS Salary, CONCAT(employees.first_name, " ", employees.last_name) AS Manager FROM employees JOIN roles ON employees.role_id = roles.role_id JOIN department ON roles.department_id = department.dept_id')
+    db.query('SELECT e.employee_id AS ID, e.first_name AS First, e.last_name AS Last, r.title As Position, d.dept_name AS Department, r.salary AS Salary, CONCAT(m.first_name, " ", m.last_name) AS Manager FROM employees e JOIN roles r ON e.role_id = r.role_id JOIN department d ON r.department_id = d.dept_id LEFT JOIN employees m ON m.employee_id = e.manager_id', (err, res) => {
+        if (err) throw err;
+        console.log('\n');
+        console.log('EMPLOYEES\n');
+        console.table(res);
+        questionPrompt();
+    })
 }
+
+
