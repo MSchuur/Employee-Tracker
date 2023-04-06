@@ -95,4 +95,18 @@ const viewEmployees = () => {
     })
 }
 
-
+const addDept = () => {
+    inquirer.prompt ([
+        {
+            name: 'dept_name',
+            type: 'input',
+            message: 'What is the Department you would like to add?'
+        }
+    ]).then(function(res) {
+        db.query(`INSERT INTO department (dept_name) VALUES ("${res.dept_name}") `, (err, res) => {
+            if (err) throw err;
+            console.log('\n');
+            questionPrompt();
+        });
+    });
+}
