@@ -164,15 +164,15 @@ const addEmployee = () => {
     db.query('SELECT * FROM roles', (err, res) => {
         if (err) throw err;
         res.forEach((roles) => {roleTitleArr.push(roles.title), roleIdArr.push(roles.role_id);});
-        return roleTitleArr
+        return roleTitleArr;
     });
 
     const managerNameArr = [];
     const managerIdArr = [];
-    db.query('SELECT e.manager_id, CONCAT(e.first_name, " ", e.last_name) AS Manager FROM employees e LEFT JOIN employees m ON m.employee_id = e.manager_id', (err, res) => {
+    db.query('SELECT e.manager_id, CONCAT(e.first_name, " ", e.last_name) AS Manager, e.employee_id  FROM employees e LEFT JOIN employees m ON m.employee_id = e.manager_id', (err, res) => {
         if (err) throw err;
-        res.forEach((employees) => {managerNameArr.push(employees.Manager), managerIdArr.push(employees.employee_id);});
-        return managerNameArr
+        res.forEach((employees) => {managerIdArr.push(employees.employee_id), managerNameArr.push(employees.Manager) ;});
+        return managerNameArr;
     })
 
     inquirer.prompt ([
@@ -202,22 +202,77 @@ const addEmployee = () => {
         for(i = 0; i < roleTitleArr.length; i++) {
             if (res.role_id === roleTitleArr[i]) {
                 res.role_id = roleIdArr[i];
-                console.log(res.role_id);
-            };
-        };
-        for(i = 0; i < managerNameArr.length; i++) {
-            if (res.manager_id === managerNameArr[i]) {
-                res.manager_id = managerIdArr[i];
-                console.log(res.manager_id);
             };
         };
 
-        db.query(`INSERT INTO roles (title, salary, department_id) VALUES ("${res.title}", ${res.salary}, ${res.dept_name} ) `, (err, res) => {
+        for(i = 0; i < managerNameArr.length; i++) {
+            if (res.manager_id === managerNameArr[i]) {
+                res.manager_id = managerIdArr[i];
+                                
+            };
+        };
+        
+        db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ("${res.first_name}", "${res.last_name}", ${res.role_id}, ${res.manager_id})`, (err, res) => {
             if (err) throw err;
-                console.log('Role added\n');
+            console>log('\n');
+            console.log('New Employee added\n');
                 questionPrompt();
             });
             
         
+    });
+}
+
+const updateEmployee = () => {
+    // Create Arrays for the role title for the inquirer prompt list and role ID for the SQL insert into Employees table 
+    const roleTitleArr = [];
+    const roleIdArr = [];
+    db.query('SELECT * FROM roles', (err, res) => {
+        if (err) throw err;
+        res.forEach((roles) => {roleTitleArr.push(roles.title), roleIdArr.push(roles.role_id);});
+        return roleTitleArr;
+    });
+    // Create Arrays for the employee name concatenated and the employee id to be used to update the role 
+    const employeeNameArr = [];
+    const employeeIdArr = [];
+    db.query('SELECT CONCAT(e.first_name, " ", e.last_name) AS Employee, e.employee_id  FROM employees e', (err, res) => {
+        if (err) throw err;
+        res.forEach((employees) => {employeeIdArr.push(employees.employee_id), employeeNameArr.push(employees.Employee) ;});
+        return employeeNameArr;
+    })
+
+    inquirer.prompt([
+    {
+        name: 'empolyee_name',
+        type: 'list',
+        message: 'Which employee do you wish to change their role?',
+        choices: employeeNameArr
+    },
+    {
+        name: 'role_id',
+        type: 'list',
+        message: "What is the employee's new Role?",
+        choices: roleTitleArr
+    },
+    ]).then((res) => {
+        for(i = 0; i < roleTitleArr.length; i++) {
+            if (res.role_id === roleTitleArr[i]) {
+                res.role_id = roleIdArr[i];
+            };
+        };
+
+        for(i = 0; i < managerNameArr.length; i++) {
+            if (res.employee_id === employeeNameArr[i]) {
+                res.employee_id = employeeIdArr[i];
+                                
+            };
+        };
+        
+        db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ("${res.first_name}", "${res.last_name}", ${res.role_id}, ${res.manager_id})`, (err, res) => {
+            if (err) throw err;
+            console>log('\n');
+            console.log('New Employee added\n');
+                questionPrompt();
+            });
     });
 }
