@@ -24,8 +24,9 @@ const questionPrompt = () => {
             'Veiw All Roles',
             'View All Employees',
             'Add a Department',
-            'Add Role',
-            'Add Employee',
+            'Add a Role',
+            'Add an Employee',
+            'Update an Employee',
             'Quit'
         ]
         }
@@ -47,12 +48,16 @@ const questionPrompt = () => {
                 addDept();
                 break;
 
-            case 'Add Role':
+            case 'Add a Role':
                 addRole();
                 break;
 
-            case 'Add Employee':
+            case 'Add an Employee':
                 addEmployee();
+                break;
+
+            case 'Update an Employee':
+                updateEmployee();
                 break;
 
             case 'Quit':
@@ -86,7 +91,7 @@ const viewRoles = () => {
 }
 
 const viewEmployees = () => {
-    db.query('SELECT e.employee_id AS ID, e.first_name AS First, e.last_name AS Last, r.title As Position, d.dept_name AS Department, r.salary AS Salary, CONCAT(m.first_name, " ", m.last_name) AS Manager FROM employees e JOIN roles r ON e.role_id = r.role_id JOIN department d ON r.department_id = d.dept_id LEFT JOIN employees m ON m.employee_id = e.manager_id', (err, res) => {
+    db.query('SELECT e.employee_id AS ID, CONCAT(e.first_name, " ", e.last_name) AS Employee, r.title As Position, d.dept_name AS Department, r.salary AS Salary, CONCAT(m.first_name, " ", m.last_name) AS Manager FROM employees e JOIN roles r ON e.role_id = r.role_id JOIN department d ON r.department_id = d.dept_id LEFT JOIN employees m ON m.employee_id = e.manager_id', (err, res) => {
         if (err) throw err;
         console.log('\n');
         console.log('EMPLOYEES\n');
@@ -108,5 +113,46 @@ const addDept = () => {
             console.log('\n');
             questionPrompt();
         });
+    });
+}
+
+const addRole = () => {
+    const deptNameArr = [];
+    const departmentData = db.query('SELECT * FROM department', (err, res) => {
+        if (err) throw err;
+        res.forEach((department) => {deptNameArr.push(department.dept_name);});
+        return deptNameArr
+    })
+     
+    inquirer.prompt ([
+        {
+            name: 'title',
+            type: 'input',
+            message: 'What is the title of the new role?'
+        },
+        {
+            name: 'salary',
+            type: 'number',
+            message: 'What is the annual salary for this role?'
+        },
+        {
+            name: 'dept_name',
+            type: 'list',
+            message: 'What department is the new role in?',
+            choices: deptNameArr
+        }
+    ]).then((res) => {
+        console.log(res.dept_name);
+        for(i = 0; i < deptNameArr.length; i++) {
+            if (res.dept_name === deptNameArr[i]) {
+                res.dept_name = i+1;
+                console.log(res.dept_name);
+                db.query(`INSERT INTO roles (title, salary, department_id) VALUES ("${res.title}", ${res.salary}, ${res.dept_name} ) `, (err, res) => {
+                    if (err) throw err;
+                    console.log('\n');
+                    questionPrompt();
+                });
+            };
+        };
     });
 }
