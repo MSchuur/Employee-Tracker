@@ -56,7 +56,7 @@ const questionPrompt = () => {
                 addEmployee();
                 break;
 
-            case 'Update an Employee':
+            case "Update an Employee's Role":
                 updateEmployee();
                 break;
 
@@ -111,6 +111,7 @@ const addDept = () => {
         db.query(`INSERT INTO department (dept_name) VALUES ("${res.dept_name}") `, (err, res) => {
             if (err) throw err;
             console.log('\n');
+            console.log('Department added\n');
             questionPrompt();
         });
     });
@@ -118,11 +119,12 @@ const addDept = () => {
 
 const addRole = () => {
     const deptNameArr = [];
-    const departmentData = db.query('SELECT * FROM department', (err, res) => {
+    const deptIdArr = [];
+    db.query('SELECT * FROM department', (err, res) => {
         if (err) throw err;
-        res.forEach((department) => {deptNameArr.push(department.dept_name);});
+        res.forEach((department) => {deptNameArr.push(department.dept_name), deptIdArr.push(department.dept_id);});
         return deptNameArr
-    })
+    });
      
     inquirer.prompt ([
         {
@@ -142,17 +144,80 @@ const addRole = () => {
             choices: deptNameArr
         }
     ]).then((res) => {
-        console.log(res.dept_name);
         for(i = 0; i < deptNameArr.length; i++) {
             if (res.dept_name === deptNameArr[i]) {
-                res.dept_name = i+1;
-                console.log(res.dept_name);
+                res.dept_name = deptIdArr[i];
                 db.query(`INSERT INTO roles (title, salary, department_id) VALUES ("${res.title}", ${res.salary}, ${res.dept_name} ) `, (err, res) => {
                     if (err) throw err;
-                    console.log('\n');
+                    console.log('Role added\n');
                     questionPrompt();
                 });
             };
         };
+    });
+}
+
+const addEmployee = () => {
+    // Create Arrays for the role title for the inquirer prompt list and role ID for the SQL insert into Employees table 
+    const roleTitleArr = [];
+    const roleIdArr = [];
+    db.query('SELECT * FROM roles', (err, res) => {
+        if (err) throw err;
+        res.forEach((roles) => {roleTitleArr.push(roles.title), roleIdArr.push(roles.role_id);});
+        return roleTitleArr
+    });
+
+    const managerNameArr = [];
+    const managerIdArr = [];
+    db.query('SELECT e.manager_id, CONCAT(e.first_name, " ", e.last_name) AS Manager FROM employees e LEFT JOIN employees m ON m.employee_id = e.manager_id', (err, res) => {
+        if (err) throw err;
+        res.forEach((employees) => {managerNameArr.push(employees.Manager), managerIdArr.push(employees.employee_id);});
+        return managerNameArr
+    })
+
+    inquirer.prompt ([
+        {
+            name: 'first_name',
+            type: 'input',
+            message: 'What is the First name of the new employee?'
+        },
+        {
+            name: 'last_name',
+            type: 'input',
+            message: 'What is the Last name of the new employee?'
+        },
+        {
+            name: 'role_id',
+            type: 'list',
+            message: 'What is the role the new employee will be filling?',
+            choices: roleTitleArr
+        },
+        {
+            name: 'manager_id',
+            type: 'list',
+            message: "Who will be new employee's manager?",
+            choices: managerNameArr
+        },
+    ]).then((res) => {
+        for(i = 0; i < roleTitleArr.length; i++) {
+            if (res.role_id === roleTitleArr[i]) {
+                res.role_id = roleIdArr[i];
+                console.log(res.role_id);
+            };
+        };
+        for(i = 0; i < managerNameArr.length; i++) {
+            if (res.manager_id === managerNameArr[i]) {
+                res.manager_id = managerIdArr[i];
+                console.log(res.manager_id);
+            };
+        };
+
+        db.query(`INSERT INTO roles (title, salary, department_id) VALUES ("${res.title}", ${res.salary}, ${res.dept_name} ) `, (err, res) => {
+            if (err) throw err;
+                console.log('Role added\n');
+                questionPrompt();
+            });
+            
+        
     });
 }
