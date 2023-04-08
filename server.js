@@ -26,7 +26,7 @@ const questionPrompt = () => {
             'Add a Department',
             'Add a Role',
             'Add an Employee',
-            'Update an Employee',
+            'Update an Employee Role',
             'Quit'
         ]
         }
@@ -56,7 +56,7 @@ const questionPrompt = () => {
                 addEmployee();
                 break;
 
-            case "Update an Employee's Role":
+            case 'Update an Employee Role':
                 updateEmployee();
                 break;
 
@@ -230,22 +230,30 @@ const updateEmployee = () => {
     db.query('SELECT * FROM roles', (err, res) => {
         if (err) throw err;
         res.forEach((roles) => {roleTitleArr.push(roles.title), roleIdArr.push(roles.role_id);});
+        // console.log(roleTitleArr);
         return roleTitleArr;
-    });
+    })
+
     // Create Arrays for the employee name concatenated and the employee id to be used to update the role 
     const employeeNameArr = [];
     const employeeIdArr = [];
     db.query('SELECT CONCAT(e.first_name, " ", e.last_name) AS Employee, e.employee_id  FROM employees e', (err, res) => {
         if (err) throw err;
-        res.forEach((employees) => {employeeIdArr.push(employees.employee_id), employeeNameArr.push(employees.Employee) ;});
+        res.forEach((employees) => {employeeNameArr.push(employees.Employee), employeeIdArr.push(employees.employee_id);});
+        // console.log(employeeNameArr);
         return employeeNameArr;
     })
 
     inquirer.prompt([
     {
-        name: 'empolyee_name',
+        name: 'test',
+        type: 'input',
+        message: 'Why do I need this'
+    },
+    {
+        name: 'employee_id',
         type: 'list',
-        message: 'Which employee do you wish to change their role?',
+        message: 'Select an employee to their role?',
         choices: employeeNameArr
     },
     {
@@ -253,26 +261,26 @@ const updateEmployee = () => {
         type: 'list',
         message: "What is the employee's new Role?",
         choices: roleTitleArr
-    },
+    }
+        
     ]).then((res) => {
+        for(i = 0; i < employeeNameArr.length; i++) {
+            if (res.employee_id === employeeNameArr[i]) {
+                res.employee_id = employeeIdArr[i];
+            };
+        };
+        
         for(i = 0; i < roleTitleArr.length; i++) {
             if (res.role_id === roleTitleArr[i]) {
                 res.role_id = roleIdArr[i];
             };
         };
 
-        for(i = 0; i < managerNameArr.length; i++) {
-            if (res.employee_id === employeeNameArr[i]) {
-                res.employee_id = employeeIdArr[i];
-                                
-            };
-        };
-        
-        db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ("${res.first_name}", "${res.last_name}", ${res.role_id}, ${res.manager_id})`, (err, res) => {
+        db.query(`UPDATE employees SET role_id = ${res.role_id} WHERE employee_id = ${res.employee_id}`, (err, res) => {
             if (err) throw err;
-            console>log('\n');
-            console.log('New Employee added\n');
-                questionPrompt();
+            console.log('\n');
+            console.log('Employee Role Updated\n');
+            questionPrompt();
             });
     });
 }
