@@ -33,7 +33,11 @@ Then at the mysql> prompt type "SOURCE seeds.sql;" This will seed all three tabl
 <img width="1277" alt="Seeds" src="https://user-images.githubusercontent.com/120262482/230789562-f1c37ab5-943a-4a01-90b9-d6e7610e8636.png">
 
 ## Usage
-After the DataBase has been setup at the bash command line (make sure you change terminals at this time) type NPM Start. A list of available options will appear. Use the Up and Down arrows to navigate to the option you wish to conduct and click 'Enter". The following is a video on how to navigate the application.
+After the DataBase has been setup at the bash command line (make sure you change terminals at this time) type NPM Start. 
+
+<img width="1279" alt="NPM_Start" src="https://user-images.githubusercontent.com/120262482/230790152-49e4acb7-e538-47fc-9635-4099497df87c.png">
+
+A list of available options will appear. Use the Up and Down arrows to navigate to the option you wish to conduct and click 'Enter". The following is a video on how to navigate the application.
 
 https://drive.google.com/file/d/11YZ82ktPf9VVLuG4lC6Yctq9JYVo7XNq/view
 
