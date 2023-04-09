@@ -13,13 +13,29 @@
 - [Questions](#questions)
 
 ## Description
-Keep track of all employees
+All companies require a solid DataBase to keep track of employees. The Employee Tracker is a Command Line (CLI) application that is designed to allow managers to easily see the employees that are on staff, the department they belong to, the role they are preforming and how they are reporting to. This application is designed to allow future enhancement as the orginization grows. 
 
 ## Installation
-NPM Install, mysql source schema, mysql source seeds
+To install this application clone the Github repo and create a copy on your local machine. Once you have cloned your copy open the application in VS Code, open a new terminal and in the CLI type NPM Install.
+
+<img width="1279" alt="NPM_Install" src="https://user-images.githubusercontent.com/120262482/230789105-80f70d47-e736-43cf-8028-8da082ca35c3.png">
+
+Before runnig the application you must install MySQL onto your local machine ensuring you are using the Server version.  Once install open a second terminal and start the MySQL CLI interface by typing mysql - root -p 
+
+<img width="1279" alt="MySQL Init" src="https://user-images.githubusercontent.com/120262482/230789342-52fff7de-6087-43d9-884f-3a6406bb52e7.png">
+
+At the mysql> prompt type mysql "SOURCE schema.sql;" This will initiate the employee_trackerBD and create the Department, Roles and Employees tables.
+
+<img width="1279" alt="Schema" src="https://user-images.githubusercontent.com/120262482/230789404-76ab4227-c70a-4fb6-949d-89ad4f78a190.png">
+
+Then at the mysql> prompt type "SOURCE seeds.sql;" This will seed all three tables with base data that can be changed later.
+
+<img width="1277" alt="Seeds" src="https://user-images.githubusercontent.com/120262482/230789562-f1c37ab5-943a-4a01-90b9-d6e7610e8636.png">
 
 ## Usage
-NPM Start, video
+After the DataBase has been setup at the bash command line (make sure you change terminals at this time) type NPM Start. A list of available options will appear. Use the Up and Down arrows to navigate to the option you wish to conduct and click 'Enter". The following is a video on how to navigate the application.
+
+https://drive.google.com/file/d/11YZ82ktPf9VVLuG4lC6Yctq9JYVo7XNq/view
 
 ## License
 This project does not have a license attached.
