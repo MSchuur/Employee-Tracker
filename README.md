@@ -39,7 +39,7 @@ After the DataBase has been setup at the bash command line (make sure you change
 
 A list of available options will appear. Use the Up and Down arrows to navigate to the option you wish to conduct and click 'Enter". The following is a video on how to navigate the application:
 
-https://drive.google.com/file/d/11YZ82ktPf9VVLuG4lC6Yctq9JYVo7XNq/view
+
 
 ## License
 This project does not have a license attached.
