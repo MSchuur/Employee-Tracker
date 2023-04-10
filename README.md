@@ -39,7 +39,7 @@ After the DataBase has been setup at the bash command line (make sure you change
 
 A list of available options will appear. Use the Up and Down arrows to navigate to the option you wish to conduct and click 'Enter". The following is a video on how to navigate the application:
 
-[Employee Tracker.webm](https://user-images.githubusercontent.com/120262482/230793581-399a2110-3607-4eea-8f62-0d928694cac4.webm)
+https://drive.google.com/file/d/1S6fBpFg4Y2G4w_zZdlJYLjpefFwGUwZy/view
 
 ## License
 This project does not have a license attached.
