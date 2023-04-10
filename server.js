@@ -24,48 +24,67 @@ const questionPrompt = () => {
         name: 'option',
         message: 'What would you like to do?',
         choices: [
-            'View All Departments',
-            'Veiw All Roles',
-            'View All Employees',
-            'Add a Department',
-            'Add a Role',
-            'Add an Employee',
-            'Update an Employee Role',
+            "View All Departments",
+            "Veiw All Roles",
+            "View All Employees",
+            "Add a Department",
+            "Add a Role",
+            "Add an Employee",
+            "Update an Employee's Role",
+            "Update an Employee's Manager",
+            "View Employee(s) by Department",
+            "View Employee(s) by Manager",
+            "View Budget by Department",
+            "Delete Department",
+            "Delete Role",
+            "Delete Employee",
             'Quit'
         ]
         }
     ]).then(function ({option})  {
         // Call the appropriate function when the option is chosen
         switch (option) {
-            case 'View All Departments':
+            case "View All Departments":
                 viewDept();
                 break;
 
-            case 'Veiw All Roles':
+            case "Veiw All Roles":
                 viewRoles();
                 break;
 
-            case 'View All Employees':
+            case "View All Employees":
                 viewEmployees();
                 break;
 
-            case 'Add a Department':
+            case "Add a Department":
                 addDept();
                 break;
 
-            case 'Add a Role':
+            case "Add a Role":
                 addRole();
                 break;
 
-            case 'Add an Employee':
+            case "Add an Employee":
                 addEmployee();
                 break;
 
-            case 'Update an Employee Role':
+            case "Update an Employee's Role":
                 updateEmployee();
                 break;
 
-            case 'Quit':
+            case "Update an Employee's Manager":
+                updateManager ();
+                break;
+
+            case "View Employee(s) by Department":
+                viewEmployeebyDept();
+                break;
+            
+            case "View Employee(s) by Manager":
+                viewEmployeebyManager();
+                break;
+
+            case "Quit":
                 db.end();
                 console.log('Connection broken');
                 break
@@ -101,6 +120,18 @@ const roleQuery = () =>{
 const viewEmployeeQuery = () =>{
     return new Promise((resolve, reject)=>{
         db.query('SELECT e.employee_id AS ID, CONCAT(e.first_name, " ", e.last_name) AS Employee, r.title As Position, d.dept_name AS Department, r.salary AS Salary, CONCAT(m.first_name, " ", m.last_name) AS Manager FROM employees e JOIN roles r ON e.role_id = r.role_id JOIN department d ON r.department_id = d.dept_id LEFT JOIN employees m ON m.employee_id = e.manager_id',  (err, res)=>{
+            if(err){
+                return reject(err);
+            }
+            return resolve(res);
+        });
+    });
+};
+
+// Create the Promise to return the employee query from the DataBase to be used in the View Employee function
+const viewManagerQuery = () =>{
+    return new Promise((resolve, reject)=>{
+        db.query('SELECT e.employee_id AS ID, CONCAT(e.first_name, " ", e.last_name) AS Employee, CONCAT(m.first_name, " ", m.last_name) AS Manager, e.manager_id AS Manager_ID FROM employees e LEFT JOIN employees m ON m.employee_id = e.manager_id',  (err, res)=>{
             if(err){
                 return reject(err);
             }
@@ -327,6 +358,147 @@ const updateEmployee = async () => {
                     console.log('Employee Role Updated\n');
                     questionPrompt();
                     });
+            });
+    } catch(error){
+    console.log(error)
+    };
+}
+
+// Calls the Promise from the View Employee query to update the Manager of an employee
+const updateManager = async () => {
+    try{
+        const result1 = await viewEmployeeQuery();
+        const employeeNameArr = [];
+        const employeeIdArr = [];
+        // Creates the list of manager name for the inquirer list
+        result1.forEach((employees) => {employeeNameArr.push(employees.Employee), employeeIdArr.push(employees.ID);});
+           
+        const result2 = await viewEmployeeQuery();
+        const managerNameArr = [];
+        const managerIdArr = [];
+        // Creates the list of role titles for the inquirer list
+        result2.forEach((employees) => {managerNameArr.push(employees.Employee), managerIdArr.push(employees.ID);});
+        
+        inquirer.prompt([
+            {
+                name: 'employee_id',
+                type: 'list',
+                message: 'Select an employee to their role?',
+                choices: employeeNameArr
+            },
+            {
+                name: 'manager_id',
+                type: 'list',
+                message: "Who is the employee's new Manager?",
+                choices: managerNameArr
+            }
+                
+            ]).then((res) => {
+                // Changes the Employee Name selected in the inquirer list to the Employee Id to be to used to change the employee table
+                for(i = 0; i < employeeNameArr.length; i++) {
+                    if (res.employee_id === employeeNameArr[i]) {
+                        res.employee_id = employeeIdArr[i];
+                    };
+                };
+                // Changes the Role Title selected in the inquirer list to the Role Id to be inserted into the employees table
+                for(i = 0; i < managerNameArr.length; i++) {
+                    if (res.manager_id === managerNameArr[i]) {
+                        res.manager_id = managerIdArr[i];
+                    };
+                    // Sets the Manager Id to null if the Employee and Manager Id are the same
+                    if (res.manager_id === res.employee_id) {
+                        res.manager_id = null;
+                    };
+                };
+                // The SQL statement to insert the new role into the employees table
+                db.query(`UPDATE employees SET manager_id = ${res.manager_id} WHERE employee_id = ${res.employee_id}`, (err, res) => {
+                    if (err) throw err;
+                    console.log('\n');
+                    console.log('Employee Manager Updated\n');
+                    questionPrompt();
+                    });
+            });
+    } catch(error){
+    console.log(error)
+    };
+}
+
+// Calls the Promise from the View Employee by Manager query
+const viewEmployeebyDept = async () => {
+    try{
+        const result = await deptQuery();
+        const deptNameArr = [];
+        const deptIdArr = [];
+        // Creates the list of Departments for the inquirer list
+        result.forEach((department) => {deptNameArr.push(department.Department), managerIdArr.push(department.ID)});
+        
+        inquirer.prompt([
+            {
+                name: 'department_id',
+                type: 'list',
+                message: "From which Department to you wish to see the Employee(s)?",
+                choices: deptNameArr
+            }
+            ]).then((res) => {
+                // Set Manager Name as the Manager Id
+                for(i = 0; i < deptNameArr.length; i++) {
+                    if (res.department_id === deptNameArr[i]) {
+                        res.department_id = deptIdArr[i];
+                    };
+                };
+                // Creates a the SQL statement as a variable to be called later
+                 const manQuery = `SELECT CONCAT(e.first_name, " ", e.last_name) AS Employee FROM employees e where manager_id = ${res.manager_id};`;
+                
+                // Calls the variable with the SQL statement and uses the result from the inquirer prompt
+                db.query (manQuery, (err, res) => {
+                    if (err) throw err;
+                    console.log('\n');
+                    console.table(res);
+                    questionPrompt();
+                });
+            });
+    } catch(error){
+    console.log(error)
+    };
+}
+
+// Calls the Promise from the View Employee by Manager query
+const viewEmployeebyManager = async () => {
+    try{
+        const result = await viewManagerQuery();
+        const managerNameArr = [];
+        const managerIdArr = [];
+        // Creates the list of Managers for the inquirer list
+        result.forEach((employees) => {
+            if(employees.Manager_ID === null) {
+                managerNameArr.push(employees.Employee), managerIdArr.push(employees.ID);
+            }
+        });
+        
+        inquirer.prompt([
+            {
+                name: 'manager_id',
+                type: 'list',
+                message: "Which Manager to you wish to see their Employee(s)?",
+                choices: managerNameArr
+            }
+            ]).then((res) => {
+                // Set Manager Name as the Manager Id
+                for(i = 0; i < managerNameArr.length; i++) {
+                    if (res.manager_id === managerNameArr[i]) {
+                        res.manager_id = managerIdArr[i];
+                    };
+                };
+                // Creates a the SQL statement as a variable to be called later
+                 const manQuery = `SELECT CONCAT(e.first_name, " ", e.last_name) AS Employee FROM employees e where manager_id = ${res.manager_id};`;
+                
+                // Calls the variable with the SQL statement and uses the result from the inquirer prompt
+                db.query (manQuery, (err, res) => {
+                    if (err) throw err;
+                    console.log('\n');
+                    console.table(res);
+                    questionPrompt();
+                });
             });
     } catch(error){
     console.log(error)
