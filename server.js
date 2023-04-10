@@ -84,6 +84,10 @@ const questionPrompt = () => {
                 viewEmployeebyManager();
                 break;
 
+            case "View Budget by Department":
+                viewBudgetByDept();
+                break;
+
             case "Quit":
                 db.end();
                 console.log('Connection broken');
@@ -423,14 +427,14 @@ const updateManager = async () => {
     };
 }
 
-// Calls the Promise from the View Employee by Manager query
+// Calls the Promise from the View Department to get the Department ID
 const viewEmployeebyDept = async () => {
     try{
         const result = await deptQuery();
         const deptNameArr = [];
         const deptIdArr = [];
         // Creates the list of Departments for the inquirer list
-        result.forEach((department) => {deptNameArr.push(department.Department), managerIdArr.push(department.ID)});
+        result.forEach((department) => {deptNameArr.push(department.Department), deptIdArr.push(department.ID)});
         
         inquirer.prompt([
             {
@@ -440,17 +444,18 @@ const viewEmployeebyDept = async () => {
                 choices: deptNameArr
             }
             ]).then((res) => {
-                // Set Manager Name as the Manager Id
+                console.log(res.department_id)
+                // Set Department Name as the Department Id
                 for(i = 0; i < deptNameArr.length; i++) {
                     if (res.department_id === deptNameArr[i]) {
                         res.department_id = deptIdArr[i];
                     };
                 };
                 // Creates a the SQL statement as a variable to be called later
-                 const manQuery = `SELECT CONCAT(e.first_name, " ", e.last_name) AS Employee FROM employees e where manager_id = ${res.manager_id};`;
+                 const deptQuery = `SELECT CONCAT(e.first_name, " ", e.last_name) AS Employee FROM employees e JOIN roles r ON e.role_id = r.role_id JOIN department d ON r.department_id = d.dept_id WHERE d.dept_id = ${res.department_id};`;
                 
                 // Calls the variable with the SQL statement and uses the result from the inquirer prompt
-                db.query (manQuery, (err, res) => {
+                db.query (deptQuery, (err, res) => {
                     if (err) throw err;
                     console.log('\n');
                     console.table(res);
@@ -505,4 +510,42 @@ const viewEmployeebyManager = async () => {
     };
 }
 
+// Calls the Promise from the Department query to get the Department Id
+const viewBudgetByDept = async () => {
+    try{
+        const result = await deptQuery();
+        const deptNameArr = [];
+        const deptIdArr = [];
+        // Creates the list of Departments for the inquirer list
+        result.forEach((department) => {deptNameArr.push(department.Department), deptIdArr.push(department.ID)});
+                
+        inquirer.prompt([
+            {
+                name: 'dept_id',
+                type: 'list',
+                message: "From which Department to you wish to see the Budget?",
+                choices: deptNameArr
+            }
+            ]).then((res) => {
+                // Set Manager Name as the Manager Id
+                for(i = 0; i < deptNameArr.length; i++) {
+                    if (res.dept_id === deptNameArr[i]) {
+                        res.dept_id = deptIdArr[i];
+                    };
+                };
+                // Creates a the SQL statement as a variable to be called later
+                 const budgetQuery = `SELECT SUM(r.salary) AS BUDGET FROM roles r JOIN department d ON r.department_id = d.dept_id WHERE d.dept_id = ${res.dept_id};`;
+                
+                // Calls the variable with the SQL statement and uses the result from the inquirer prompt
+                db.query (budgetQuery, (err, res) => {
+                    if (err) throw err;
+                    console.log('\n');
+                    console.table(res);
+                    questionPrompt();
+                });
+            });
+    } catch(error){
+    console.log(error)
+    };
+}
 questionPrompt();
