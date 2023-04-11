@@ -25,7 +25,7 @@ const questionPrompt = () => {
         message: 'What would you like to do?',
         choices: [
             "View All Departments",
-            "Veiw All Roles",
+            "View All Roles",
             "View All Employees",
             "Add a Department",
             "Add a Role",
@@ -48,7 +48,7 @@ const questionPrompt = () => {
                 viewDept();
                 break;
 
-            case "Veiw All Roles":
+            case "View All Roles":
                 viewRoles();
                 break;
 
@@ -86,6 +86,18 @@ const questionPrompt = () => {
 
             case "View Budget by Department":
                 viewBudgetByDept();
+                break;
+
+            case "Delete Department":
+                deleteDept();
+                break;
+
+            case "Delete Role":
+                deleteRole();
+                break;
+
+            case "Delete Employee":
+                deleteEmployee();
                 break;
 
             case "Quit":
@@ -527,7 +539,7 @@ const viewBudgetByDept = async () => {
                 choices: deptNameArr
             }
             ]).then((res) => {
-                // Set Manager Name as the Manager Id
+                // Set Dept Id required to query the Salaries by
                 for(i = 0; i < deptNameArr.length; i++) {
                     if (res.dept_id === deptNameArr[i]) {
                         res.dept_id = deptIdArr[i];
@@ -548,4 +560,151 @@ const viewBudgetByDept = async () => {
     console.log(error)
     };
 }
+
+// Calls the Promise from the Department query to get the Department Id
+const deleteDept = async () => {
+    try{
+        const result = await deptQuery();
+        const deptNameArr = [];
+        const deptIdArr = [];
+        // Creates the list of Departments for the inquirer list
+        result.forEach((department) => {deptNameArr.push(department.Department), deptIdArr.push(department.ID)});
+        
+        // Warning and question to confirm that users wants to continue with the deleting of the department
+        inquirer.prompt([
+            {
+                name: 'confirmDelete',
+                type: 'list',
+                message: 'WARNING!!!! Deleting a department will delete all roles and employees associated with the department. Do you wish to continue?',
+                choices: ['YES', 'NO']
+            }
+        ]).then((response) => {
+            if(response.confirmDelete === 'NO') {
+                questionPrompt();
+            } 
+        }).then (() => {
+
+            inquirer.prompt([
+                {
+                    name: 'dept_id',
+                    type: 'list',
+                    message: "Which Department do you want to delete?",
+                    choices: deptNameArr
+                }
+                ]).then((res) => {
+                    // Set Dept Id required to delete the Department
+                    for(i = 0; i < deptNameArr.length; i++) {
+                        if (res.dept_id === deptNameArr[i]) {
+                            res.dept_id = deptIdArr[i];
+                        };
+                    };
+                    // Creates a the SQL statement as a variable to be called later
+                    const deleteDeptQuery = `DELETE FROM department d WHERE d.dept_id = ${res.dept_id};`;
+                    
+                    // Calls the variable with the SQL statement and uses the result from the inquirer prompt
+                    db.query (deleteDeptQuery, (err, res) => {
+                        if (err) throw err;
+                        // console.log('\n');
+                        console.log(`\n Department has been deleted\n`);
+                        questionPrompt();
+                    });
+                });
+            });    
+    } catch(error){
+    console.log(error)
+    };
+}
+
+// Calls the Promise from the Roles query to get the Role Id
+const deleteRole = async () => {
+    try{
+        const result = await roleQuery();
+        const roleTitleArr = [];
+        const roleIdArr = [];
+        // Creates the list of Roles for the inquirer list
+        result.forEach((roles) => {roleTitleArr.push(roles.Title), roleIdArr.push(roles.ID)});
+        
+        inquirer.prompt([
+            {
+                name: 'confirmDelete',
+                type: 'list',
+                message: 'WARNING!!!! Deleting a role will delete all employees associated with the role. Do you wish to continue?',
+                choices: ['NO', 'YES']
+            }
+        ]).then((response) => {
+            if(response.confirmDelete === 'NO') {
+                questionPrompt();
+            } 
+        }).then (() => {
+            inquirer.prompt([
+                {
+                    name: 'role_id',
+                    type: 'list',
+                    message: "Which Department do you want to delete?",
+                    choices: roleTitleArr
+                }
+                ]).then((res) => {
+                    // Set Role Id required to delete the role
+                    for(i = 0; i < roleTitleArr.length; i++) {
+                        if (res.role_id === roleTitleArr[i]) {
+                            res.role_id = roleIdArr[i];
+                        };
+                    };
+                    // Creates a the SQL statement as a variable to be called later
+                    const deleteRoleQuery = `DELETE FROM roles r WHERE r.role_id = ${res.role_id};`;
+                    
+                    // Calls the variable with the SQL statement and uses the result from the inquirer prompt
+                    db.query (deleteRoleQuery, (err, res) => {
+                        if (err) throw err;
+                        // console.log('\n');
+                        console.log(`\n Role has been deleted\n`);
+                        questionPrompt();
+                    });
+                });
+            })
+    } catch(error){
+    console.log(error)
+    };
+}
+
+// Calls the Promise from the Employees query to get the Employee Id
+const deleteEmployee = async () => {
+    try{
+        const result = await viewEmployeeQuery();
+        const employeeNameArr = [];
+        const employeeIdArr = [];
+        // Creates the list of Employees for the inquirer list
+        result.forEach((employees) => {employeeNameArr.push(employees.Employee), employeeIdArr.push(employees.ID)});
+        
+        inquirer.prompt([
+            {
+                name: 'employee_id',
+                type: 'list',
+                message: "Which Department do you want to delete?",
+                choices: employeeNameArr
+            }
+            ]).then((res) => {
+                // Set Employee Id required to delete the employee
+                for(i = 0; i < employeeNameArr.length; i++) {
+                    if (res.employee_id === employeeNameArr[i]) {
+                        res.employee_id = employeeIdArr[i];
+                    };
+                };
+            // Creates a the SQL statement as a variable to be called later
+            const deleteEmployeeQuery = `DELETE FROM employees e WHERE e.employee_id = ${res.employee_id};`;
+                
+            // Calls the variable with the SQL statement and uses the result from the inquirer prompt
+            db.query (deleteEmployeeQuery, (err, res) => {
+                if (err) throw err;
+                // console.log('\n');
+                console.log(`\n Employee has been deleted\n`);
+                questionPrompt();
+            });
+        });
+       
+    } catch(error){
+    console.log(error)
+    };
+}
+
 questionPrompt();
