@@ -89,15 +89,15 @@ const questionPrompt = () => {
                 break;
 
             case "Delete Department":
-                deleteDept();
+                deleteDeptWarning();
                 break;
 
             case "Delete Role":
-                deleteRole();
+                deleteRoleWarning();
                 break;
 
             case "Delete Employee":
-                deleteEmployee();
+                deleteEmployeeWarning();
                 break;
 
             case "Quit":
@@ -561,6 +561,63 @@ const viewBudgetByDept = async () => {
     };
 }
 
+// Gives a warning about deleteing the Department and the user must confirm they wish to delete the Department
+const deleteDeptWarning = ()=> {
+    // Warning and question to confirm that users wants to continue with the deleting of the department
+    inquirer.prompt([
+        {
+            name: 'confirmDelete',
+            type: 'list',
+            message: '!!!!WARNING!!!! Deleting a department will delete all roles and employees associated with the department. Do you wish to continue?',
+            choices: ['YES', 'NO']
+        }
+    ]).then((response) => {
+        if(response.confirmDelete === 'NO') {
+            questionPrompt();
+        } else {
+            deleteDept();
+        }
+    })
+}
+
+// Gives a warning about deleteing the Role and the user must confirm they wish to delete the Role
+const deleteRoleWarning = ()=> {
+    // Warning and question to confirm that users wants to continue with the deleting of the department
+    inquirer.prompt([
+        {
+            name: 'confirmDelete',
+            type: 'list',
+            message: '!!!!WARNING!!!! Deleting a Role will delete all employees associated with the Role. Do you wish to continue?',
+            choices: ['YES', 'NO']
+        }
+    ]).then((response) => {
+        if(response.confirmDelete === 'NO') {
+            questionPrompt();
+        } else {
+            deleteRole();
+        }
+    })
+}
+
+// Gives a warning about deleteing the Employee and the user must confirm they wish to delete the Role
+const deleteEmployeeWarning = ()=> {
+    // Warning and question to confirm that users wants to continue with the deleting of the department
+    inquirer.prompt([
+        {
+            name: 'confirmDelete',
+            type: 'list',
+            message: '!!!!WARNING!!!! Deleting an Employee will delete information about the Employee. Do you wish to continue?',
+            choices: ['YES', 'NO']
+        }
+    ]).then((response) => {
+        if(response.confirmDelete === 'NO') {
+            questionPrompt();
+        } else {
+            deleteEmployee();
+        }
+    })
+}
+
 // Calls the Promise from the Department query to get the Department Id
 const deleteDept = async () => {
     try{
@@ -570,46 +627,31 @@ const deleteDept = async () => {
         // Creates the list of Departments for the inquirer list
         result.forEach((department) => {deptNameArr.push(department.Department), deptIdArr.push(department.ID)});
         
-        // Warning and question to confirm that users wants to continue with the deleting of the department
         inquirer.prompt([
             {
-                name: 'confirmDelete',
+                name: 'dept_id',
                 type: 'list',
-                message: 'WARNING!!!! Deleting a department will delete all roles and employees associated with the department. Do you wish to continue?',
-                choices: ['YES', 'NO']
+                message: "Which Department do you want to delete?",
+                choices: deptNameArr
             }
-        ]).then((response) => {
-            if(response.confirmDelete === 'NO') {
-                questionPrompt();
-            }
-        }).then (() => {
-
-            inquirer.prompt([
-                {
-                    name: 'dept_id',
-                    type: 'list',
-                    message: "Which Department do you want to delete?",
-                    choices: deptNameArr
-                }
-                ]).then((res) => {
-                    // Set Dept Id required to delete the Department
-                    for(i = 0; i < deptNameArr.length; i++) {
-                        if (res.dept_id === deptNameArr[i]) {
-                            res.dept_id = deptIdArr[i];
-                        };
+            ]).then((res) => {
+                // Set Dept Id required to delete the Department
+                for(i = 0; i < deptNameArr.length; i++) {
+                    if (res.dept_id === deptNameArr[i]) {
+                        res.dept_id = deptIdArr[i];
                     };
-                    // Creates a the SQL statement as a variable to be called later
-                    const deleteDeptQuery = `DELETE FROM department d WHERE d.dept_id = ${res.dept_id};`;
-                    
-                    // Calls the variable with the SQL statement and uses the result from the inquirer prompt
-                    db.query (deleteDeptQuery, (err, res) => {
-                        if (err) throw err;
-                        // console.log('\n');
-                        console.log(`\n Department has been deleted\n`);
-                        questionPrompt();
-                    });
-                });
-            });    
+                };
+            // Creates a the SQL statement as a variable to be called later
+            const deleteDeptQuery = `DELETE FROM department d WHERE d.dept_id = ${res.dept_id};`;
+                
+            // Calls the variable with the SQL statement and uses the result from the inquirer prompt
+            db.query (deleteDeptQuery, (err, res) => {
+                if (err) throw err;
+                // console.log('\n');
+                console.log(`\n Department has been deleted\n`);
+                questionPrompt();
+            });
+        });
     } catch(error){
     console.log(error)
     };
@@ -650,18 +692,18 @@ const deleteRole = async () => {
                             res.role_id = roleIdArr[i];
                         };
                     };
-                    // Creates a the SQL statement as a variable to be called later
-                    const deleteRoleQuery = `DELETE FROM roles r WHERE r.role_id = ${res.role_id};`;
+                // Creates a the SQL statement as a variable to be called later
+                const deleteRoleQuery = `DELETE FROM roles r WHERE r.role_id = ${res.role_id};`;
                     
-                    // Calls the variable with the SQL statement and uses the result from the inquirer prompt
-                    db.query (deleteRoleQuery, (err, res) => {
-                        if (err) throw err;
-                        // console.log('\n');
-                        console.log(`\n Role has been deleted\n`);
-                        questionPrompt();
-                    });
+                // Calls the variable with the SQL statement and uses the result from the inquirer prompt
+                db.query (deleteRoleQuery, (err, res) => {
+                    if (err) throw err;
+                    // console.log('\n');
+                    console.log(`\n Role has been deleted\n`);
+                    questionPrompt();
                 });
-            })
+            });
+        })
     } catch(error){
     console.log(error)
     };
@@ -701,7 +743,6 @@ const deleteEmployee = async () => {
                 questionPrompt();
             });
         });
-       
     } catch(error){
     console.log(error)
     };
