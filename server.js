@@ -581,7 +581,7 @@ const deleteDept = async () => {
         ]).then((response) => {
             if(response.confirmDelete === 'NO') {
                 questionPrompt();
-            } 
+            }
         }).then (() => {
 
             inquirer.prompt([
